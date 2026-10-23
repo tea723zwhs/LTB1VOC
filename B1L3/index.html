@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 3 Vocabulary Picture Quiz</title>
+  <style>
+    :root { --ink:#172033; --muted:#697386; --line:#dce3ee; --blue:#2f6fed; --blue-dark:#1f54ba; --good:#147a48; --bad:#bd3131; --panel:#fff; }
+    * { box-sizing:border-box; }
+    html, body { width:100%; height:100%; overflow:hidden; }
+    body { margin:0; min-height:100dvh; color:var(--ink); font-family:Arial, "Noto Sans TC", sans-serif; background:linear-gradient(140deg,#eef4ff 0%,#f9fbff 52%,#eaf8f3 100%); }
+    button { font:inherit; cursor:pointer; }
+    .app { width:min(1220px, calc(100vw - 24px)); height:100dvh; min-height:0; margin:auto; padding:10px 0 12px; display:flex; flex-direction:column; }
+    header { flex:none; display:flex; align-items:center; gap:9px; flex-wrap:wrap; padding:0 0 9px; }
+    h1 { margin:0 auto 0 0; font-size:clamp(19px,2vw,27px); letter-spacing:.15px; }
+    .mode { border:1px solid #cbd6e7; color:#334155; background:#fff; border-radius:10px; padding:9px 13px; font-weight:700; }
+    .mode.active { border-color:var(--blue); background:var(--blue); color:white; box-shadow:0 4px 10px #2f6fed33; }
+    .shuffle { border:0; border-radius:10px; background:#15253d; color:#fff; padding:10px 14px; font-weight:800; }
+    .shuffle:hover { background:#09172a; }
+    .card { position:relative; flex:1; min-height:0; border:1px solid #dce5f0; background:var(--panel); box-shadow:0 16px 46px #33517f1b; border-radius:18px; overflow:hidden; padding:clamp(10px,1.8vh,18px); display:flex; flex-direction:column; }
+    .status { flex:none; color:var(--muted); font-size:clamp(12px,1.5vw,15px); font-weight:700; margin:0 3px 7px; }
+    .single-wrap { flex:1; min-height:0; display:flex; align-items:center; justify-content:center; }
+    .single-wrap img { display:block; width:auto; max-width:100%; max-height:100%; object-fit:contain; border-radius:8px; }
+    .bottom { flex:none; min-height:54px; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px; padding-top:8px; }
+    .answer { min-width:min(100%,640px); text-align:center; font-weight:900; font-size:clamp(24px,4.1vw,54px); letter-spacing:.5px; min-height:45px; display:flex; justify-content:center; align-items:center; }
+    .answer.hidden { visibility:hidden; }
+    .primary, .next, .audio { border:0; border-radius:12px; color:#fff; background:var(--blue); box-shadow:0 4px 12px #2f6fed42; font-weight:800; padding:12px 21px; }
+    .primary:hover, .next:hover, .audio:hover { background:var(--blue-dark); }
+    .next { display:none; background:#1b7949; }
+    .next.show { display:inline-block; }
+    .quiz-card { flex:1; min-height:0; display:flex; flex-direction:column; }
+    .quiz-top { flex:none; display:flex; align-items:center; justify-content:center; min-height:54px; }
+    .audio { min-width:188px; display:inline-flex; align-items:center; justify-content:center; gap:9px; font-size:20px; }
+    .audio img { width:24px; height:24px; object-fit:contain; filter:invert(1); }
+    .audio.playing { animation:pulse .7s ease-in-out infinite alternate; }
+    @keyframes pulse { to { transform:scale(1.045); box-shadow:0 0 0 9px #2f6fed24; } }
+    .hint { flex:none; color:var(--muted); text-align:center; font-size:14px; font-weight:700; margin:1px 0 7px; }
+    .grid { flex:1; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(2,minmax(0,1fr)); gap:13px; min-height:0; }
+    .option { min-height:0; padding:0; position:relative; border:4px solid transparent; border-radius:14px; overflow:hidden; background:#fff; transition:transform .13s,border-color .13s,box-shadow .13s; }
+    .option:not(:disabled):hover { transform:translateY(-3px); border-color:#84aafa; box-shadow:0 10px 22px #426fa733; }
+    .option img { width:100%; height:100%; display:block; object-fit:contain; }
+    .option.correct { border-color:var(--good); box-shadow:inset 0 0 0 3px #fff, 0 0 0 2px var(--good); }
+    .option.wrong { border-color:var(--bad); opacity:.67; }
+    .feedback { flex:none; min-height:45px; display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; padding-top:5px; font-size:clamp(18px,2.5vw,30px); font-weight:900; text-align:center; }
+    .feedback.good { color:var(--good); } .feedback.bad { color:var(--bad); }
+    .feedback .answer-term { color:var(--ink); }
+    @media (max-width:640px) { .app { width:calc(100vw - 14px); padding:7px 0; } header { gap:6px; padding-bottom:6px; } h1 { width:100%; font-size:18px; line-height:22px; } .card { padding:9px; border-radius:13px; } .mode,.shuffle { padding:7px 9px; font-size:14px; } .status { margin-bottom:4px; } .grid { gap:7px; } .option { border-width:3px; border-radius:10px; } .audio { min-width:158px; padding:9px 14px; font-size:17px; } .quiz-top { min-height:44px; } .hint { margin-bottom:5px; font-size:12px; } .feedback { min-height:36px; font-size:18px; } .bottom { min-height:46px; padding-top:5px; } .primary,.next { padding:9px 15px; } }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1>Lesson 3 · Vocabulary Picture Quiz</h1>
+      <button class="mode active" id="pictureMode">看圖猜字</button>
+      <button class="mode" id="choiceMode">選圖聽音</button>
+      <button class="shuffle" id="shuffleBtn">↻ 洗牌</button>
+    </header>
+    <section class="card" id="app" aria-live="polite"></section>
+  </main>
+  <script>
+    const deck = [{"term": "wonder", "image": "assets/images/01_wonder.webp"}, {"term": "amazing", "image": "assets/images/02_amazing.webp"}, {"term": "average", "image": "assets/images/03_average.webp"}, {"term": "therefore", "image": "assets/images/04_therefore.webp"}, {"term": "nap", "image": "assets/images/05_nap.webp"}, {"term": "float", "image": "assets/images/06_float.webp"}, {"term": "avoid", "image": "assets/images/07_avoid.webp"}, {"term": "surface", "image": "assets/images/08_surface.webp"}, {"term": "breathe", "image": "assets/images/09_breathe.webp"}, {"term": "awake", "image": "assets/images/10_awake.webp"}, {"term": "impressive", "image": "assets/images/11_impressive.webp"}, {"term": "distance", "image": "assets/images/12_distance.webp"}, {"term": "journey", "image": "assets/images/13_journey.webp"}, {"term": "flight", "image": "assets/images/14_flight.webp"}, {"term": "variety", "image": "assets/images/15_variety.webp"}, {"term": "creature", "image": "assets/images/16_creature.webp"}, {"term": "expert", "image": "assets/images/17_expert.webp"}, {"term": "survive", "image": "assets/images/18_survive.webp"}, {"term": "hold on to", "image": "assets/images/19_hold_on_to.webp"}, {"term": "look out for", "image": "assets/images/20_look_out_for.webp"}, {"term": "be on the lookout for", "image": "assets/images/21_be_on_the_lookout_for.webp"}, {"term": "for example", "image": "assets/images/22_for_example.webp"}, {"term": "according to", "image": "assets/images/23_according_to.webp"}, {"term": "up to", "image": "assets/images/24_up_to.webp"}];
+    const audioIcon = "";
+    let order = [...deck];
+    let position = 0;
+    let mode = 'picture';
+    let answered = false;
+    const app = document.getElementById('app');
+    const pictureMode = document.getElementById('pictureMode');
+    const choiceMode = document.getElementById('choiceMode');
+
+    function scramble(items) {
+      const copy = [...items];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+    function current() { return order[position]; }
+    function next() { position = (position + 1) % order.length; answered = false; render(); }
+    function speak() {
+      const term = current().term;
+      if (!('speechSynthesis' in window)) { alert('這個瀏覽器無法使用朗讀功能。請以 Chrome 或 Edge 開啟。'); return; }
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(term);
+      utterance.lang = 'en-US'; utterance.rate = .78; utterance.pitch = 1;
+      const btn = document.querySelector('.audio');
+      utterance.onstart = () => btn?.classList.add('playing');
+      utterance.onend = () => btn?.classList.remove('playing');
+      utterance.onerror = () => btn?.classList.remove('playing');
+      window.speechSynthesis.speak(utterance);
+    }
+    function showAnswer() {
+      document.getElementById('answer').classList.remove('hidden');
+      document.getElementById('reveal').style.display = 'none';
+      document.getElementById('next').classList.add('show');
+    }
+    function answerChoice(button, selected) {
+      if (answered) return;
+      answered = true;
+      const target = current();
+      document.querySelectorAll('.option').forEach(btn => {
+        btn.disabled = true;
+        if (btn.dataset.term === target.term) btn.classList.add('correct');
+      });
+      const feedback = document.getElementById('feedback');
+      if (selected.term === target.term) {
+        feedback.className = 'feedback good';
+        feedback.innerHTML = '✓ 答對了！ <span class="answer-term">' + target.term + '</span>';
+      } else {
+        button.classList.add('wrong');
+        feedback.className = 'feedback bad';
+        feedback.innerHTML = '✗ 再看一下。正確答案：<span class="answer-term">' + target.term + '</span>';
+      }
+      document.getElementById('next').classList.add('show');
+    }
+    function renderPicture() {
+      const item = current();
+      app.innerHTML = `
+        <div class="status">第 ${position + 1} / ${order.length} 題　先看圖，想一想英文。</div>
+        <div class="single-wrap"><img src="${item.image}" alt="Vocabulary picture"></div>
+        <div class="bottom">
+          <div id="answer" class="answer hidden">${item.term}</div>
+          <button class="primary" id="reveal">顯示答案</button>
+          <button class="next" id="next">下一題　→</button>
+        </div>
+      `;
+      document.getElementById('reveal').onclick = showAnswer;
+      document.getElementById('next').onclick = next;
+    }
+    function renderChoice() {
+      const target = current();
+      const decoys = scramble(order.filter(item => item.term !== target.term)).slice(0, 3);
+      const options = scramble([target, ...decoys]);
+      app.innerHTML = `
+        <div class="status">第 ${position + 1} / ${order.length} 題　先聽英文，再選最符合的圖。</div>
+        <div class="quiz-card">
+          <div class="quiz-top"><button class="audio" id="audio"><span aria-hidden="true">🔊</span> 播放英文</button></div>
+          <p class="hint">可重複播放</p>
+          <div class="grid">
+            ${options.map(item => '<button class="option" data-term="' + item.term + '" aria-label="選擇圖片"><img loading="lazy" src="' + item.image + '" alt="Vocabulary option"></button>').join('')}
+          </div>
+        </div>
+        <div id="feedback" class="feedback"></div>
+        <div class="bottom" style="padding-top:0"><button class="next" id="next">下一題　→</button></div>
+      `;
+      document.getElementById('audio').onclick = speak;
+      document.querySelectorAll('.option').forEach((button, index) => button.onclick = () => answerChoice(button, options[index]));
+      document.getElementById('next').onclick = next;
+      setTimeout(speak, 300);
+    }
+    function render() { mode === 'picture' ? renderPicture() : renderChoice(); }
+    pictureMode.onclick = () => { mode = 'picture'; position = 0; answered = false; pictureMode.classList.add('active'); choiceMode.classList.remove('active'); render(); };
+    choiceMode.onclick = () => { mode = 'choice'; position = 0; answered = false; choiceMode.classList.add('active'); pictureMode.classList.remove('active'); render(); };
+    document.getElementById('shuffleBtn').onclick = () => { order = scramble(order); position = 0; answered = false; window.speechSynthesis?.cancel(); render(); };
+    render();
+  </script>
+</body>
+</html>
